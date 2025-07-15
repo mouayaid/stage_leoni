@@ -2,11 +2,10 @@ import openai
 import os
 from dotenv import load_dotenv
 
-# تحميل مفتاح API من .env
-load_dotenv()
+load_dotenv("core/.env")
 openai.api_key = os.getenv("OPENAI_API_KEY")
-openai.organization="org-ruk7j93n7f6fhEenUXySqV32"
-openai.project="proj_SBTJ0zB0j5X90EXMROI7wUX5"
+openai.organization = os.getenv("OPENAI_ORG")
+openai.project = os.getenv("OPENAI_PROJECT")
 
 def gpt_extract_root_cause(reason_text):
     """
