@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Evalyze - Importation Fichier</title>
+</head>
+<body>
+  <h1>📤 Importer un fichier Excel</h1>
+
+  {% if error %}
+    <p style="color: red;">{{ error }}</p>
+  {% endif %}
+
+  <form action="" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <input type="file" name="excel_file" accept=".xlsx,.xls" required>
+    <button type="submit">Analyser</button>
+  </form>
+</body>
+</html>
