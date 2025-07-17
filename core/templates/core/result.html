@@ -27,19 +27,31 @@
   <h1>📋 Résultats d’analyse GPT</h1>
 
   {% for item in results %}
-  {% if "Accepted" in item.gpt_feedback %}
+  {% if item.status == "Accepted" %}
   <div class="card accepted">
-{% else %}
+  {% else %}
   <div class="card rejected">
-{% endif %}
+  {% endif %}
 
-  <p><strong>🔖 Référence:</strong> {{ item.reference }}</p>
-  <p><strong>❗ Finding:</strong> {{ item.finding }}</p>
-  <p><strong>🧠 Root Cause (GPT):</strong> {{ item.root_cause }}</p>
-  <p><strong>📊 Évaluation GPT:</strong></p>
-  <pre>{{ item.gpt_feedback }}</pre>
-</div>
-    </div>
+    <p><strong>🔖 Référence:</strong> {{ item.reference }}</p>
+    <p><strong>❗ Finding:</strong> {{ item.finding }}</p>
+    <p><strong>🧠 Root Cause (GPT):</strong> {{ item.root_cause }}</p>
+
+    <p><strong>📊 Évaluation GPT:</strong></p>
+    <pre>Score: {{ item.score }}/5</pre>
+    <pre>Status: {{ item.status }}</pre>
+    <p><strong>💬 Commentaire:</strong> <em>{{ item.comment }}</em></p>
+
+    <hr/>
+
+    <p><strong>🛠️ Corrective Action:</strong> {{ item.measures }}</p>
+
+    <p><strong>📉 Évaluation Action Corrective:</strong></p>
+    <pre>Score: {{ item.ca_score }}/5</pre>
+    <pre>Status: {{ item.ca_status }}</pre>
+    <p><strong>💬 Commentaire:</strong> <em>{{ item.ca_comment }}</em></p>
+
+  </div>
   {% endfor %}
 
   <a href="/" style="text-decoration:none;">⬅️ Retour</a>
