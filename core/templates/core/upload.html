@@ -3,18 +3,131 @@
 <head>
   <meta charset="UTF-8">
   <title>Evalyze - Importation Fichier</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      background: linear-gradient(120deg, #e0eafc, #cfdef3);
+      min-height: 100vh;
+      margin: 0;
+      font-family: 'Roboto', Arial, sans-serif;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .upload-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 32px 28px 24px 28px;
+      max-width: 400px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+    h1 {
+      font-size: 1.7rem;
+      margin-bottom: 10px;
+      color: #007BFF;
+      font-weight: 700;
+    }
+    .instructions {
+      color: #555;
+      font-size: 1rem;
+      margin-bottom: 18px;
+    }
+    .error {
+      color: #d32f2f;
+      margin-bottom: 12px;
+      font-weight: 500;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+    }
+    input[type="file"] {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 8px 6px;
+      background: #f8f9fa;
+      font-size: 1rem;
+      width: 100%;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+    button[type="submit"] {
+      background: linear-gradient(90deg, #007BFF 60%, #0056b3 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 32px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+    }
+    button[type="submit"]:hover {
+      background: linear-gradient(90deg, #0056b3 60%, #007BFF 100%);
+      transform: translateY(-2px) scale(1.03);
+    }
+    /* Spinner overlay styles */
+    .spinner-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.85);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      border-radius: 16px;
+      flex-direction: column;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #007BFF;
+      display: none;
+    }
+    .spinner {
+      border: 5px solid #e0eafc;
+      border-top: 5px solid #007BFF;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
 </head>
 <body>
-  <h1>📤 Importer un fichier Excel</h1>
-
-  {% if error %}
-    <p style="color: red;">{{ error }}</p>
-  {% endif %}
-
-  <form action="" method="post" enctype="multipart/form-data">
-    {% csrf_token %}
-    <input type="file" name="excel_file" accept=".xlsx,.xls" required>
-    <button type="submit">Analyser</button>
-  </form>
+  <div class="upload-card">
+    <h1>📤 Upload an Excel File</h1>
+    <div class="instructions">Select an Excel file (.xlsx or .xls) containing your audit data to analyze.</div>
+    {% if error %}
+      <div class="error">{{ error }}</div>
+    {% endif %}
+    <form id="uploadForm" action="" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      <input type="file" name="excel_file" accept=".xlsx,.xls" required>
+      <button type="submit">Analyze</button>
+    </form>
+    <div class="spinner-overlay" id="spinnerOverlay">
+      <div class="spinner"></div>
+      Analysis in progress... Please wait.
+    </div>
+  </div>
+  <script>
+    const form = document.getElementById('uploadForm');
+    const spinner = document.getElementById('spinnerOverlay');
+    form.addEventListener('submit', function() {
+      spinner.style.display = 'flex';
+      // Disable form elements to prevent resubmission
+      Array.from(form.elements).forEach(el => el.disabled = true);
+    });
+  </script>
 </body>
 </html>
