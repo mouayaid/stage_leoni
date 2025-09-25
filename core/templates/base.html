@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Evalyze{% endblock %}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Roboto', Arial, sans-serif;
+      display: flex;
+      min-height: 100vh;
+      background: linear-gradient(120deg, #e0eafc, #cfdef3);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 220px;
+      background: #ffffff;
+      border-right: 1px solid #ddd;
+      padding: 30px 20px;
+      box-shadow: 4px 0 12px rgba(0,0,0,0.05);
+    }
+    .sidebar h2 { font-size: 1.2rem; margin-bottom: 20px; color: #007BFF; }
+    .sidebar a {
+      display: block;
+      margin-bottom: 12px;
+      text-decoration: none;
+      color: #333;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+    .sidebar a:hover { color: #007BFF; }
+
+    /* Logout button styled like a link */
+    .logout-form { display: inline; }
+    .logout-link {
+      background: none;
+      border: none;
+      padding: 0;
+      margin: 0 0 12px 0;
+      font: inherit;
+      color: #333;
+      font-weight: 500;
+      cursor: pointer;
+      text-align: left;
+      display: block;
+    }
+    .logout-link:hover { color: #007BFF; }
+
+    /* Main area */
+    .main-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px;
+    }
+
+    /* Shared card + form styles */
+    .card, .upload-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 32px 28px 24px 28px;
+      max-width: 1000px;
+      width: 100%;
+      text-align: center;
+      position: relative;
+    }
+    .narrow { max-width: 400px; }
+
+    h1 { font-size: 1.7rem; margin-bottom: 10px; color: #007BFF; font-weight: 700; }
+    .instructions { color: #555; font-size: 1rem; margin-bottom: 18px; }
+    .error { color: #d32f2f; margin-bottom: 12px; font-weight: 500; }
+
+    form.vertical { display: flex; flex-direction: column; gap: 18px; align-items: center; }
+
+    input[type="file"], input[type="text"], input[type="password"] {
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      padding: 10px;
+      background: #f8f9fa;
+      font-size: 1rem;
+      width: 100%;
+      max-width: 260px;
+      margin: 0 auto;
+    }
+
+    button[type="submit"], .btn-primary {
+      background: linear-gradient(90deg, #007BFF 60%, #0056b3 100%);
+      color: #fff;
+      border: none;
+      border-radius: 6px;
+      padding: 10px 32px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+      box-shadow: 0 2px 8px rgba(0,123,255,0.08);
+    }
+    button[type="submit"]:hover, .btn-primary:hover {
+      background: linear-gradient(90deg, #0056b3 60%, #007BFF 100%);
+      transform: translateY(-2px) scale(1.03);
+    }
+
+    /* Spinner (used on upload page) */
+    .spinner-overlay {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      border-radius: 16px;
+      flex-direction: column;
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #007BFF;
+    }
+    .spinner {
+      border: 5px solid #e0eafc;
+      border-top: 5px solid #007BFF;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+
+  <!-- Children can add extra <style> tags here if needed -->
+  {% block extra_head %}{% endblock %}
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+  <!-- Sidebar (always visible) -->
+  <div class="sidebar">
+    <h2>📂 Evalyze</h2>
+    <a href="{% url 'upload' %}">📤 New Analysis</a>
+    <a href="{% url 'history' %}">📜 History</a>
+    {% if user.is_authenticated %}
+      <form method="post" action="{% url 'logout' %}" class="logout-form">
+        {% csrf_token %}
+        <button type="submit" class="logout-link">🚪 Logout</button>
+      </form>
+    {% else %}
+      <a href="{% url 'login' %}">🔐 Login</a>
+      <a href="{% url 'register' %}">📝 Register</a>
+    {% endif %}
+  </div>
+
+  <!-- Page content -->
+  <div class="main-container">
+    {% block content %}{% endblock %}
+  </div>
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

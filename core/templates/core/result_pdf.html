@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block title %}📄 PDCA Report{% endblock %}
+
+{% block extra_css %}
+<style>
+  .page { width:100%; max-width:800px; margin:0 auto; font-family:Arial, sans-serif; }
+  .h1 { text-align:center; font-weight:800; margin:0 0 16px; color:#0d6efd; }
+
+  .blk { margin:12px 0 20px; page-break-inside: avoid; }
+
+  .badges { margin:6px 0 12px; display:flex; flex-wrap:wrap; gap:6px; }
+  .badge {
+    display:inline-block; padding:4px 10px; border-radius:999px; font-size:.85rem; font-weight:600;
+    border:1px solid #ccc; background:#f8f9fa;
+  }
+  .badge.ok { background:#e6fff3; border-color:#28a745; }
+  .badge.bad { background:#ffebe9; border-color:#dc3545; }
+
+  .reason-bad {
+    margin: 6px 0 10px;
+    padding: 8px 10px;
+    border: 1px solid #dc3545;
+    background: #fff5f5;
+    color: #b02a37;
+    border-radius: 8px;
+    font-size: 0.95rem;
+  }
+
+  .stage {
+    border:1px solid #ddd; padding:8px 10px; border-radius:8px; margin:8px 0; background:#fafafa;
+  }
+  .stage h3 { margin:0 0 6px; font-size:1rem; color:#333; }
+  .small { color:#555; font-size:0.9rem; }
+  ul.kv { margin:6px 0 0 18px; font-size:.9rem; }
+
+  hr { border:0; border-top:1px solid #ccc; margin:18px 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page">
+  <h1 class="h1">📄 PDCA Analysis Report</h1>
+
+  {% for item in results %}
+    {% with pdca=item.pdca %}
+    <div class="blk">
+      <h3>🔖 Reference: {{ item.reference }}</h3>
+
+      <div class="small">Finding:</div>
+      <p>{{ item.finding }}</p>
+
+      <div class="small">Root Cause (summary):</div>
+      <p>{{ item.root_cause }}</p>
+
+      <div class="badges">
+        <span class="badge {% if pdca.overall_score|default:0 >= pdca.min_required %}ok{% else %}bad{% endif %}">
+          Overall: {{ pdca.overall_score }}/10
+        </span>
+        <span class="badge">Min: {{ pdca.min_required }}</span>
+        <span class="badge {% if pdca.status == 'Accepted' %}ok{% else %}bad{% endif %}">
+          Status: {{ pdca.status }}
+        </span>
+        <span class="badge">Critical: {{ pdca.critical }}</span>
+        <span class="badge {% if pdca.excellence.req1 %}ok{% else %}bad{% endif %}">
+          Excellence #1: {{ pdca.excellence.req1 }}
+        </span>
+        <span class="badge {% if pdca.excellence.req3 %}ok{% else %}bad{% endif %}">
+          Excellence #3: {{ pdca.excellence.req3 }}
+        </span>
+      </div>
+
+      {# NEW: if it's Not Accepted, show a clear reason block in red #}
+      {% if pdca.status == "Not Accepted" %}
+        <div class="reason-bad">
+          ⚠️ <strong>Reason:</strong>
+          {{ pdca.overall_comment|default:"Overall score below threshold and/or Excellence requirements not met." }}
+        </div>
+      {% elif pdca.overall_comment %}
+        <p class="small"><em>{{ pdca.overall_comment }}</em></p>
+      {% endif %}
+
+      {% for s in pdca.by_stage %}
+        <div class="stage">
+          <h3>{{ s.stage }} — Avg: {{ s.avg }}</h3>
+          {% if s.comment %}<div class="small"><em>{{ s.comment }}</em></div>{% endif %}
+          {% if s.scores %}
+            <ul class="kv">
+              {% for k,v in s.scores.items %}
+                <li>{{ k }}: <strong>{{ v }}</strong></li>
+              {% endfor %}
+            </ul>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+    {% if not forloop.last %}<hr/>{% endif %}
+    {% endwith %}
+  {% endfor %}
+</div>
+{% endblock %}

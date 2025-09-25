@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block title %}📜 Analysis History{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Layout */
+  .history-wrap { width: 100%; max-width: 1100px; margin: 0 auto; }
+  .toolbar {
+    display: flex; gap: 12px; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .toolbar-left, .toolbar-right { display: flex; gap: 10px; align-items: center; }
+
+  .input, .select {
+    border: 1px solid #d7dbe7; background: #f8fafc; padding: 10px 12px; border-radius: 10px;
+    font-size: 14px; outline: none;
+  }
+  .btn {
+    border: 0; padding: 10px 14px; border-radius: 12px; cursor: pointer; font-weight: 600;
+    background: linear-gradient(90deg,#007BFF 60%,#0056b3 100%); color: #fff;
+    box-shadow: 0 6px 16px rgba(0,123,255,.15);
+    text-decoration: none;
+  }
+  .btn:active { transform: translateY(1px); }
+
+  /* Card */
+  .card.softer { padding: 20px 22px; }
+
+  /* Table */
+  .table-wrap { overflow: auto; border-radius: 12px; }
+  table.history {
+    width: 100%; border-collapse: separate; border-spacing: 0; background: #fff;
+    box-shadow: 0 6px 18px rgba(16,24,40,.08);
+    border-radius: 12px; overflow: hidden;
+  }
+  table.history th, table.history td { padding: 12px 14px; }
+  table.history thead th {
+    position: sticky; top: 0; z-index: 1;
+    background: #0d6efd; color: #fff; text-align: left; font-weight: 700;
+  }
+  table.history tbody tr { transition: background .15s ease; }
+  table.history tbody tr:nth-child(even) { background: #f8fafc; }
+  table.history tbody tr:hover { background: #eef5ff; }
+
+  /* Wrapping for specific columns */
+  .cell-wrap {
+    white-space: normal;
+    word-break: break-word;
+    max-width: 300px;
+  }
+
+  /* Chips */
+  .chip {
+    display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px;
+    font-size: 12px; font-weight: 700;
+  }
+  .chip.score   { background: #e8f1ff; color: #0b5ed7; }
+  .chip.ca      { background: #e6fff3; color: #0a8f55; }
+  .chip.bad     { background: #ffebe9; color: #b42318; }
+
+  /* Empty state */
+  .empty {
+    text-align: center; padding: 28px; color: #667085;
+  }
+  .empty .emoji { font-size: 42px; margin-bottom: 8px; }
+
+  /* Pagination */
+  .pagination { display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 12px; }
+  .muted { color: #667085; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="history-wrap">
+  <div class="card softer">
+    <div class="toolbar">
+      <div class="toolbar-left">
+        <h1 style="margin:0; color:#0b5ed7; font-weight:800; display:flex; align-items:center; gap:10px;">
+          <span>📜</span> Analysis History
+        </h1>
+      </div>
+      <div class="toolbar-right">
+        <input id="searchBox" class="input" type="text" placeholder="Search ref, root cause, action…" />
+        <select id="scoreFilter" class="select">
+          <option value="">Score: any</option>
+          <option value="4">Score ≥ 4</option>
+          <option value="3">Score ≥ 3</option>
+          <option value="2">Score ≥ 2</option>
+          <option value="1">Score ≥ 1</option>
+        </select>
+        <button class="btn" id="exportCsv">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table class="history" id="historyTable">
+        <thead>
+          <tr>
+            <th>Ref</th>
+            <th>Date</th>
+            <th>Root Cause</th>
+            <th>Score</th>
+            <th>Corrective Action</th>
+            <th>CA Score</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in page_obj %}
+          <tr>
+            <td>{{ item.reference }}</td>
+            <td>{{ item.created_at|date:"Y-m-d H:i" }}</td>
+            <td class="cell-wrap">{{ item.root_cause }}</td>
+            <td>
+              {% if item.score|default:0 < 3 %}
+                <span class="chip bad">{{ item.score }}/5</span>
+              {% else %}
+                <span class="chip score">{{ item.score }}/5</span>
+              {% endif %}
+            </td>
+            <td class="cell-wrap">{{ item.measures }}</td>
+            <td>
+              {% if item.ca_score|default:0 < 3 %}
+                <span class="chip bad">{{ item.ca_score }}/5</span>
+              {% else %}
+                <span class="chip ca">{{ item.ca_score }}/5</span>
+              {% endif %}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="6">
+              <div class="empty">
+                <div class="emoji">🗂️</div>
+                <div>No analysis yet. Upload a file to see results here.</div>
+              </div>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination controls -->
+    <div class="pagination">
+      {% if page_obj.has_previous %}
+        <a class="btn" href="?page=1">« First</a>
+        <a class="btn" href="?page={{ page_obj.previous_page_number }}">‹ Prev</a>
+      {% endif %}
+      <span class="muted">Page {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_next %}
+        <a class="btn" href="?page={{ page_obj.next_page_number }}">Next ›</a>
+        <a class="btn" href="?page={{ page_obj.paginator.num_pages }}">Last »</a>
+      {% endif %}
+    </div>
+
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // Simple client-side search & score filter
+  const tb = document.getElementById('historyTable').tBodies[0];
+  const rows = () => Array.from(tb.querySelectorAll('tr'));
+  const q = document.getElementById('searchBox');
+  const f = document.getElementById('scoreFilter');
+
+  function applyFilters() {
+    const term = (q.value || '').toLowerCase();
+    const min = parseInt(f.value || '0', 10);
+
+    rows().forEach(r => {
+      const tds = r.querySelectorAll('td');
+      if (!tds.length) return; // skip empty-state row
+      const ref = tds[0].innerText.toLowerCase();
+      const date = tds[1].innerText.toLowerCase();
+      const rc = tds[2].innerText.toLowerCase();
+      const score = parseInt((tds[3].innerText || '0').split('/')[0], 10) || 0;
+      const ca = tds[4].innerText.toLowerCase();
+      const caScore = parseInt((tds[5].innerText || '0').split('/')[0], 10) || 0;
+
+      const matchText = [ref, date, rc, ca].some(x => x.includes(term));
+      const matchScore = score >= min && caScore >= 0;
+
+      r.style.display = (matchText && matchScore) ? '' : 'none';
+    });
+  }
+  q.addEventListener('input', applyFilters);
+  f.addEventListener('change', applyFilters);
+
+  // CSV export
+  document.getElementById('exportCsv').addEventListener('click', () => {
+    const headers = Array.from(document.querySelectorAll('#historyTable thead th')).map(th => th.innerText.trim());
+    const data = rows()
+      .filter(r => r.style.display !== 'none')
+      .map(r => Array.from(r.querySelectorAll('td')).map(td => `"${td.innerText.replace(/"/g,'""')}"`).join(','));
+    const csv = [headers.join(','), ...data].join('\n');
+    const blob = new Blob([csv], {type: 'text/csv;charset=utf-8;'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'analysis-history.csv'; a.click();
+    URL.revokeObjectURL(url);
+  });
+</script>
+{% endblock %}

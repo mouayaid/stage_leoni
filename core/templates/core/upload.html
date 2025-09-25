@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% block title %}Upload File - Evalyze{% endblock %}
+
+{% block content %}
+<div class="upload-card narrow">
+  <h1>📤 Upload an Excel File</h1>
+
+  <div class="instructions">
+    Select an Excel file (.xlsx or .xls) and choose its format so we map the right columns.
+    <br>
+    <strong>Critical Non-Conformity?</strong>
+    <span title="If set to Yes, the PDCA pass requires minimum overall 7.5 AND Excellence requirements #1 and #3 to be true.">
+      If the non-conformity is <em>critical</em>, the PDCA will only pass if the overall score ≥ 7.5 <u>and</u> Excellence requirements #1 and #3 are satisfied.
+    </span>
+  </div>
+
+  {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+  <form id="uploadForm" action="" method="post" enctype="multipart/form-data" class="vertical">
+    {% csrf_token %}
+
+    <!-- File type (required) -->
+    <label for="file_type" style="font-weight:600;">File type</label>
+    <select name="file_type" id="file_type" required>
+      <option value="audit" selected>PDCA Audit Process</option>
+      <option value="system">PDCA System</option>
+    </select>
+
+
+
+    <!-- File chooser -->
+    <label for="excel_file" style="font-weight:600; margin-top: 8px;">Excel file</label>
+    <input id="excel_file" type="file" name="excel_file" accept=".xlsx,.xls" required>
+
+    <button type="submit" style="margin-top:12px;">Analyze</button>
+  </form>
+
+  <!-- Spinner overlay -->
+  <div class="spinner-overlay" id="spinnerOverlay" style="display:none;">
+    <div class="spinner"></div>
+    Analysis in progress... Please wait.
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  (function () {
+    const form = document.getElementById('uploadForm');
+    const spinner = document.getElementById('spinnerOverlay');
+
+    // Persist user's last selections (nice UX)
+    const fileTypeSelect = document.getElementById('file_type');
+    const criticalSelect = document.getElementById('critical');
+
+    // Restore previous choices if present
+    const savedType = localStorage.getItem('file_type');
+    if (savedType) fileTypeSelect.value = savedType;
+
+    const savedCritical = localStorage.getItem('critical');
+    if (savedCritical) criticalSelect.value = savedCritical;
+
+    // Save on change
+    fileTypeSelect.addEventListener('change', () => {
+      localStorage.setItem('file_type', fileTypeSelect.value);
+    });
+    criticalSelect.addEventListener('change', () => {
+      localStorage.setItem('critical', criticalSelect.value);
+    });
+
+    // Show spinner and disable form on submit
+    form.addEventListener('submit', function () {
+      spinner.style.display = 'flex';
+      setTimeout(() => {
+        Array.from(form.elements).forEach(el => el.disabled = true);
+      }, 10);
+    });
+  })();
+</script>
+{% endblock %}
