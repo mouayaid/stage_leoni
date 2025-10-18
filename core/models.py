@@ -17,7 +17,7 @@ class AnalysisHistory(models.Model):
     finding = models.TextField()
     reasons = models.TextField()
     root_cause = models.TextField()
-    score = models.IntegerField()
+    score = models.IntegerField(null=True, blank=True)  # ← allow NULL in DB
     status = models.CharField(max_length=50)
     comment = models.TextField()
     measures = models.TextField()

@@ -40,51 +40,29 @@
     <h1 class="page-title">📊 Analysis Results (PDCA)</h1>
 
     {% for item in results %}
-      {% with pdca=item.pdca %}
-      <div class="card result {% if pdca.status == 'Accepted' %}accepted{% else %}rejected{% endif %}">
-        <div class="section-title">🔖 Reference</div>
-        <p>{{ item.reference }}</p>
+  {% with pdca=item.pdca %}
+  <div class="card result {% if pdca.status == 'Accepted' %}accepted{% else %}rejected{% endif %}">
+    <div class="section-title">🔖 Reference</div>
+    <p>{{ item.reference }}</p>
 
-        <div class="section-title">❗ Finding</div>
-        <p>{{ item.finding }}</p>
+    <div class="section-title">❗ Finding</div>
+    <p>{{ item.finding }}</p>
 
-        <div class="section-title">🧠 Root Cause (summary)</div>
-        <p>{{ item.root_cause }}</p>
+    <div class="section-title">🧠 Root Cause (summary)</div>
+    <p>{{ item.root_cause }}</p>
 
-        <div class="section-title">📊 PDCA Evaluation</div>
-        <div class="score-block">
-          <span class="score-pill">Overall: {{ pdca.overall_score }}/10</span>
-          <span class="score-pill">Min required: {{ pdca.min_required }}</span>
-          <span class="score-pill">Status: {{ pdca.status }}</span>
-          <span class="score-pill">Excellence #1: {{ pdca.excellence.req1 }}</span>
-          <span class="score-pill">Excellence #3: {{ pdca.excellence.req3 }}</span>
-        </div>
+    <div class="section-title">📊 PDCA Evaluation</div>
+    <div class="score-block">
+      <span class="score-pill">Overall: {{ pdca.overall_score }}/10</span>
+      <span class="score-pill">Min required: {{ pdca.min_required }}</span>
+      <span class="score-pill">Status: {{ pdca.status }}</span>
+      <span class="score-pill">Excellence #1: {{ pdca.excellence_1 }}</span>
+      <span class="score-pill">Excellence #3: {{ pdca.excellence_3 }}</span>
+    </div>
+  </div>
+  {% endwith %}
+{% endfor %}
 
-        {% if pdca.overall_comment %}
-          <div class="comment">{{ pdca.overall_comment }}</div>
-        {% endif %}
-
-        <details>
-          <summary>🔍 Details per PDCA stage</summary>
-          <div style="margin-top:10px">
-            {% for s in pdca.by_stage %}
-              <div class="stage">
-                <h4>{{ s.stage }} — Avg: {{ s.avg }}</h4>
-                {% if s.comment %}<div class="comment">{{ s.comment }}</div>{% endif %}
-                {% if s.scores %}
-                  <div class="kv">
-                    {% for k,v in s.scores.items %}
-                      <span>{{ k }}: <strong>{{ v }}</strong></span>
-                    {% endfor %}
-                  </div>
-                {% endif %}
-              </div>
-            {% endfor %}
-          </div>
-        </details>
-      </div>
-      {% endwith %}
-    {% endfor %}
 
     <div class="actions">
       <a href="{% url 'download_pdf' %}" class="link-btn success">📥 Download PDF</a>
